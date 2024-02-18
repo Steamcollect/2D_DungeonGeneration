@@ -5,10 +5,16 @@ using System.Linq;
 
 public class DungeonCreator : MonoBehaviour
 {
+    [Header("Dungeon data")]
     public Vector2 minMaxVerticalRoomPos;
     public Vector2 minMaxHorizontalRoomPos;
-
     public float delayBetweenAction;
+
+    [Header("Dungeon props")]
+    public Vector2 bossRoomPos;
+
+    public Vector2 minMaxTreasurePossible;
+    public Vector2 minMaxKeysPossible;
 
     Stockage stockage;
 
@@ -29,7 +35,7 @@ public class DungeonCreator : MonoBehaviour
         // Create starting room
         GameObject tmpGO = Instantiate(stockage.startRoom, new Vector2(0, 0), Quaternion.identity);
         tmpGO.transform.SetParent(transform);
-        stockage.currentsRoom.Add(new Room(new Vector2(0, 0), RoomType.Room, tmpGO));
+        stockage.currentsRoom.Add(new Room(new Vector2(0, 0), RoomType.Room, RoomParticularity.basic, tmpGO));
 
         // Generate the rest of the dungeon
         StartCoroutine(GenerateRoom());
@@ -44,6 +50,34 @@ public class DungeonCreator : MonoBehaviour
             CreateRoom();
             yield return new WaitForSeconds(delayBetweenAction);
         }
+        if (bossRoomPos.x >= minMaxHorizontalRoomPos.x && bossRoomPos.x <= minMaxHorizontalRoomPos.y) bossRoomPos.x = 0;
+        if (bossRoomPos.y >= minMaxVerticalRoomPos.x && bossRoomPos.y <= minMaxVerticalRoomPos.y) bossRoomPos.y = minMaxVerticalRoomPos.y + 2;
+        
+        int treasureCount = (int)Random.Range(minMaxTreasurePossible.x, minMaxTreasurePossible.y + 1);
+        while (treasureCount >= 0)
+        {
+            int currentRoom = Random.Range(0, stockage.currentsRoom.Count);
+            if(stockage.currentsRoom[currentRoom].particularity != RoomParticularity.Treasure)
+            {
+                stockage.currentsRoom[currentRoom].particularity = RoomParticularity.Treasure;
+                treasureCount -=1;
+            }
+        }
+        int keyCount = (int)Random.Range(minMaxKeysPossible.x, minMaxKeysPossible.y + 1);
+        while (keyCount >= 0)
+        {
+            int currentRoom = Random.Range(0, stockage.currentsRoom.Count);
+            if(stockage.currentsRoom[currentRoom].particularity != RoomParticularity.Treasure && stockage.currentsRoom[currentRoom].particularity != RoomParticularity.Key)
+            {
+                stockage.currentsRoom[currentRoom].particularity = RoomParticularity.Key;
+                keyCount -= 1;
+            }
+        }
+
+        GameObject tmpGO = Instantiate(stockage.bossRoom, bossRoomPos, Quaternion.identity);
+        tmpGO.transform.SetParent(transform);
+        tmpGO.GetComponent<RoomData>().indexInList = stockage.currentsRoom.Count;
+        stockage.currentsRoom.Add(new Room(bossRoomPos, RoomType.Room, RoomParticularity.Boss, tmpGO));
         #endregion
 
         #region Corridor creation
@@ -98,10 +132,10 @@ public class DungeonCreator : MonoBehaviour
                     int roomFound = FindRoomWithAxialPos(currentPos);
                     if (roomFound == -1)
                     {
-                        GameObject tmpGO = Instantiate(stockage.corridor, currentPos, Quaternion.identity);
-                        tmpGO.transform.SetParent(transform);
-                        tmpGO.GetComponent<CorridorData>().indexInList = stockage.currentsRoom.Count;
-                        stockage.currentsRoom.Add(new Room(currentPos, RoomType.Corridor, tmpGO));
+                        GameObject tmpBossRoom = Instantiate(stockage.corridor, currentPos, Quaternion.identity);
+                        tmpBossRoom.transform.SetParent(transform);
+                        tmpBossRoom.GetComponent<CorridorData>().indexInList = stockage.currentsRoom.Count;
+                        stockage.currentsRoom.Add(new Room(currentPos, RoomType.Corridor, RoomParticularity.basic, tmpBossRoom));
 
                         yield return new WaitForSeconds(delayBetweenAction);
                     }
@@ -173,7 +207,7 @@ public class DungeonCreator : MonoBehaviour
         Vector2 tmpPos =new Vector2(
             (int)Random.Range(minMaxHorizontalRoomPos.x, minMaxHorizontalRoomPos.y),
             (int)Random.Range(minMaxVerticalRoomPos.x, minMaxVerticalRoomPos.y));
-        if (FindRoomWithAxialPos(tmpPos) != -1)
+        if (FindRoomWithAxialPos(tmpPos) != -1 || tmpPos == new Vector2(-1,0)|| tmpPos == new Vector2(0,1)|| tmpPos == new Vector2(1,0)|| tmpPos == new Vector2(0,-1))
         {
             CreateRoom();
             return;
@@ -183,7 +217,8 @@ public class DungeonCreator : MonoBehaviour
             GameObject tmpGO = Instantiate(stockage.room, tmpPos, Quaternion.identity);
             tmpGO.transform.SetParent(transform);
             tmpGO.GetComponent<RoomData>().indexInList = stockage.currentsRoom.Count;
-            stockage.currentsRoom.Add(new Room(tmpPos, RoomType.Room, tmpGO));
+
+            stockage.currentsRoom.Add(new Room(tmpPos, RoomType.Room, RoomParticularity.basic, tmpGO));
         }
     }
 

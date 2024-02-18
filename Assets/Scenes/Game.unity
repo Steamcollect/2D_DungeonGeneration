@@ -249,7 +249,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 8.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -274,7 +274,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5, z: -10}
+  m_LocalPosition: {x: 0, y: 5.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -597,6 +597,7 @@ MonoBehaviour:
   startRoom: {fileID: 7945563742019364286, guid: 019502713a7bc1242af31ca2c0a2ac80, type: 3}
   corridor: {fileID: 7945563742019364286, guid: 9e152475e46eee94f91a18b57e2ce9d1, type: 3}
   room: {fileID: 7945563742019364286, guid: b76f6ad0b0799254faa57c2a0dbcd007, type: 3}
+  bossRoom: {fileID: 7945563742019364286, guid: f2b7a61242bbd3745acb8ea0f947114b, type: 3}
 --- !u!114 &1184902563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -609,9 +610,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98e8270ac40a770469051a44c49c0bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minMaxVerticalRoomPos: {x: 1, y: 10}
+  minMaxVerticalRoomPos: {x: 0, y: 9}
   minMaxHorizontalRoomPos: {x: -7, y: 7}
   delayBetweenAction: 0
+  bossRoomPos: {x: 0, y: 0}
+  minMaxTreasurePossible: {x: 2, y: 5}
+  minMaxKeysPossible: {x: 1, y: 1}
 --- !u!1 &1598020347
 GameObject:
   m_ObjectHideFlags: 0

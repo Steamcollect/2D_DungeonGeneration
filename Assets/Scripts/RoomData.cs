@@ -17,6 +17,10 @@ public class RoomData : MonoBehaviour
     public GameObject topLeftWall, buttomLeftWall, topRightWall, buttomRightWall, topLeftWall90, buttomLeftWall90, topRightWall90, buttomRightWall90;
     public GameObject topDoor, rightDoor, buttomDoor, leftDoor;
 
+    [Header("Visual icons")]
+    public SpriteRenderer particularityVisual;
+    public Sprite bossIcone, treasureIcone, SecretIcone, keysIcone;
+
     /*
      * 0 top left
      * 1 top middle
@@ -127,5 +131,25 @@ public class RoomData : MonoBehaviour
            roomReferences[7] != -1 && stockage.currentsRoom[roomReferences[7]].type == RoomType.Room) buttomLeftCorner.SetActive(false);
 
         graphics.enabled = false;
+
+        switch (stockage.currentsRoom[indexInList].particularity)
+        {
+            case RoomParticularity.Treasure:
+                particularityVisual.sprite = treasureIcone;
+                particularityVisual.enabled = true;
+                break;
+            case RoomParticularity.Boss:
+                particularityVisual.sprite = bossIcone;
+                particularityVisual.enabled = true;
+                break;
+            case RoomParticularity.Secret:
+                particularityVisual.sprite = SecretIcone;
+                particularityVisual.enabled = true;
+                break;
+            case RoomParticularity.Key:
+                particularityVisual.sprite = keysIcone;
+                particularityVisual.enabled = true;
+                break;
+        }
     }
 }
