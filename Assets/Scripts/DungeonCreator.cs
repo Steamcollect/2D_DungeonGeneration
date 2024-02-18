@@ -100,6 +100,7 @@ public class DungeonCreator : MonoBehaviour
                     {
                         GameObject tmpGO = Instantiate(stockage.corridor, currentPos, Quaternion.identity);
                         tmpGO.transform.SetParent(transform);
+                        tmpGO.GetComponent<CorridorData>().indexInList = stockage.currentsRoom.Count;
                         stockage.currentsRoom.Add(new Room(currentPos, RoomType.Corridor, tmpGO));
 
                         yield return new WaitForSeconds(delayBetweenAction);
@@ -120,42 +121,48 @@ public class DungeonCreator : MonoBehaviour
         #region Dungeon visual
         for (int i = 0; i < stockage.currentsRoom.Count; i++)
         {
-            if(stockage.currentsRoom[i].type == RoomType.Room)
+            Vector2 pos = stockage.currentsRoom[i].pos;
+
+            // Get every proximity room around the current room
+            int[] tmp = new int[8];
+            tmp[0] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y + 1));
+            tmp[1] = FindRoomWithAxialPos(new Vector2(pos.x, pos.y + 1));
+            tmp[2] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y + 1));
+            tmp[3] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y));
+            tmp[4] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y - 1));
+            tmp[5] = FindRoomWithAxialPos(new Vector2(pos.x, pos.y - 1));
+            tmp[6] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y - 1));
+            tmp[7] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y));
+
+            stockage.currentsRoom[i].proximityRoomIndex = tmp;
+        }
+
+        // Set unnecessary path
+        for (int i = 0; i < stockage.currentsRoom.Count; i++)
+        {
+            if (stockage.currentsRoom[i].type == RoomType.Corridor) CheckExcessCorridor(i);
+        }
+        // Remove alone path
+        for (int i = 0; i < stockage.currentsRoom.Count; i++)
+        {
+            if (stockage.currentsRoom[i].type == RoomType.Corridor) RemoveExcessCorridor(i);
+        }
+
+        // Set the visual
+        for (int i = 0; i < stockage.currentsRoom.Count; i++)
+        {
+            if (stockage.currentsRoom[i].type == RoomType.Room)
             {
-                Vector2 pos = stockage.currentsRoom[i].pos;
-
-                int[] tmp = new int[8];
-                tmp[0] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y + 1));
-                tmp[1] = FindRoomWithAxialPos(new Vector2(pos.x, pos.y + 1));
-                tmp[2] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y + 1));
-                tmp[3] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y));
-                tmp[4] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y - 1));
-                tmp[5] = FindRoomWithAxialPos(new Vector2(pos.x, pos.y - 1));
-                tmp[6] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y - 1));
-                tmp[7] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y));
-
                 RoomData current = stockage.currentsRoom[i].go.GetComponent<RoomData>();
                 current.stockage = stockage;
-                current.SetRoomVisual(tmp);
+                current.SetRoomVisual(stockage.currentsRoom[i].proximityRoomIndex);
 
             }
             else if (stockage.currentsRoom[i].type == RoomType.Corridor)
             {
-                Vector2 pos = stockage.currentsRoom[i].pos;
-
-                int[] tmp = new int[8];
-                tmp[0] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y + 1));
-                tmp[1] = FindRoomWithAxialPos(new Vector2(pos.x, pos.y + 1));
-                tmp[2] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y + 1));
-                tmp[3] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y));
-                tmp[4] = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y - 1));
-                tmp[5] = FindRoomWithAxialPos(new Vector2(pos.x, pos.y - 1));
-                tmp[6] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y - 1));
-                tmp[7] = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y));
-
                 CorridorData current = stockage.currentsRoom[i].go.GetComponent<CorridorData>();
                 current.stockage = stockage;
-                current.SetRoomVisual(tmp);
+                current.SetRoomVisual(stockage.currentsRoom[i].proximityRoomIndex);
             }
             yield return new WaitForSeconds(delayBetweenAction);
         }
@@ -175,8 +182,67 @@ public class DungeonCreator : MonoBehaviour
         {
             GameObject tmpGO = Instantiate(stockage.room, tmpPos, Quaternion.identity);
             tmpGO.transform.SetParent(transform);
-
+            tmpGO.GetComponent<RoomData>().indexInList = stockage.currentsRoom.Count;
             stockage.currentsRoom.Add(new Room(tmpPos, RoomType.Room, tmpGO));
+        }
+    }
+
+    void CheckExcessCorridor(int i)
+    {
+        if (stockage.currentsRoom[i].proximityRoomIndex[3] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[3]].type == RoomType.Corridor
+            && stockage.currentsRoom[i].proximityRoomIndex[1] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[3]].proximityRoomIndex[1] != -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[3]].proximityRoomIndex[7] = -1;
+            stockage.currentsRoom[i].proximityRoomIndex[3] = -1;
+        }
+        if (stockage.currentsRoom[i].proximityRoomIndex[5] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[5]].type == RoomType.Corridor
+            && stockage.currentsRoom[i].proximityRoomIndex[3] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[5]].proximityRoomIndex[3] != -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[5]].proximityRoomIndex[1] = -1;
+            stockage.currentsRoom[i].proximityRoomIndex[5] = -1;
+        }
+        if (stockage.currentsRoom[i].proximityRoomIndex[7] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[7]].type == RoomType.Corridor
+            && stockage.currentsRoom[i].proximityRoomIndex[5] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[7]].proximityRoomIndex[5] != -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[7]].proximityRoomIndex[3] = -1;
+            stockage.currentsRoom[i].proximityRoomIndex[7] = -1;
+        }
+        if (stockage.currentsRoom[i].proximityRoomIndex[1] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[1]].type == RoomType.Corridor
+            && stockage.currentsRoom[i].proximityRoomIndex[7] != -1 && stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[1]].proximityRoomIndex[7] != -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[1]].proximityRoomIndex[5] = -1;
+            stockage.currentsRoom[i].proximityRoomIndex[1] = -1;
+        }
+    }
+    void RemoveExcessCorridor(int i)
+    {
+        if (stockage.currentsRoom[i].proximityRoomIndex[1] != -1 && stockage.currentsRoom[i].proximityRoomIndex[3] == -1 && stockage.currentsRoom[i].proximityRoomIndex[5] == -1 && stockage.currentsRoom[i].proximityRoomIndex[7] == -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[1]].proximityRoomIndex[5] = -1;
+            ClearProximityRoom();
+        }
+        if (stockage.currentsRoom[i].proximityRoomIndex[1] == -1 && stockage.currentsRoom[i].proximityRoomIndex[3] != -1 && stockage.currentsRoom[i].proximityRoomIndex[5] == -1 && stockage.currentsRoom[i].proximityRoomIndex[7] == -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[3]].proximityRoomIndex[7] = -1;
+            ClearProximityRoom();
+        }
+        if (stockage.currentsRoom[i].proximityRoomIndex[1] == -1 && stockage.currentsRoom[i].proximityRoomIndex[3] == -1 && stockage.currentsRoom[i].proximityRoomIndex[5] != -1 && stockage.currentsRoom[i].proximityRoomIndex[7] == -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[5]].proximityRoomIndex[1] = -1;
+            ClearProximityRoom();
+        }
+        if (stockage.currentsRoom[i].proximityRoomIndex[1] == -1 && stockage.currentsRoom[i].proximityRoomIndex[3] == -1 && stockage.currentsRoom[i].proximityRoomIndex[5] == -1 && stockage.currentsRoom[i].proximityRoomIndex[7] != -1)
+        {
+            stockage.currentsRoom[stockage.currentsRoom[i].proximityRoomIndex[7]].proximityRoomIndex[3] = -1;
+            ClearProximityRoom();
+        }
+
+        void ClearProximityRoom()
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                stockage.currentsRoom[i].proximityRoomIndex[y] = -1;
+            }
         }
     }
 
@@ -184,22 +250,22 @@ public class DungeonCreator : MonoBehaviour
     {
         int left = FindRoomWithAxialPos(new Vector2(pos.x - 1, pos.y));
         if (left != -1 && stockage.currentsRoom[left].pos == new Vector2(pos.x - 1, pos.y)
-            && Vector2.Distance(new Vector2(pos.x - 1, pos.y), Vector2.zero) <= Vector2.Distance(pos, Vector2.zero))
+            && Vector2.Distance(new Vector2(pos.x - 1, pos.y), Vector2.zero) < Vector2.Distance(pos, Vector2.zero))
             return true;
         
         int right = FindRoomWithAxialPos(new Vector2(pos.x + 1, pos.y));
         if (right != -1 && stockage.currentsRoom[right].pos == new Vector2(pos.x + 1, pos.y)
-            && Vector2.Distance(new Vector2(pos.x + 1, pos.y), Vector2.zero) <= Vector2.Distance(pos, Vector2.zero))
+            && Vector2.Distance(new Vector2(pos.x + 1, pos.y), Vector2.zero) < Vector2.Distance(pos, Vector2.zero))
             return true;
         
         int top = FindRoomWithAxialPos(new Vector2(pos.x, pos.y + 1));
         if (top != -1 && stockage.currentsRoom[top].pos == new Vector2(pos.x, pos.y + 1)
-            && Vector2.Distance(new Vector2(pos.x, pos.y + 1), Vector2.zero) <= Vector2.Distance(pos, Vector2.zero))
+            && Vector2.Distance(new Vector2(pos.x, pos.y + 1), Vector2.zero) < Vector2.Distance(pos, Vector2.zero))
             return true;
         
         int buttom = FindRoomWithAxialPos(new Vector2(pos.x, pos.y - 1));
         if (buttom != -1 && stockage.currentsRoom[buttom].pos == new Vector2(pos.x, pos.y - 1)
-            && Vector2.Distance(new Vector2(pos.x, pos.y - 1), Vector2.zero) <= Vector2.Distance(pos, Vector2.zero))
+            && Vector2.Distance(new Vector2(pos.x, pos.y - 1), Vector2.zero) < Vector2.Distance(pos, Vector2.zero))
             return true;
 
         return false;

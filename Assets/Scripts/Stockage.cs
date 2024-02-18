@@ -19,11 +19,14 @@ public class Room
     public RoomType type;
     public GameObject go;
 
+    public int[] proximityRoomIndex;
+
     public Room(Vector2 pos, RoomType type, GameObject go)
     {
         this.pos = pos;
         this.type = type;
         this.go = go;
+        proximityRoomIndex = new int[8];
     }
 }
 public enum RoomType { Room, Corridor}

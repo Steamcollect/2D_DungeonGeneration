@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class RoomData : MonoBehaviour
 {
+    public int indexInList;
     [HideInInspector]public Stockage stockage;
     SpriteRenderer graphics;
 
@@ -17,19 +18,19 @@ public class RoomData : MonoBehaviour
     public GameObject topDoor, rightDoor, buttomDoor, leftDoor;
 
     /*
-     * 1 top left
-     * 2 middle left
-     * 3 top right
-     * 4 middle right
-     * 5 buttom right
-     * 6 middle buttom
-     * 7 buttom left
-     * 8 middle left
+     * 0 top left
+     * 1 top middle
+     * 2 top right
+     * 3 middle right
+     * 4 buttom right
+     * 5 middle buttom
+     * 6 buttom left
+     * 7 middle left
     */
 
     public void SetRoomVisual(int[] roomReferences)
     {
-        if (roomReferences[1] != -1)
+        if (roomReferences[1] != -1 && stockage.currentsRoom[roomReferences[1]].proximityRoomIndex[5] != -1)
         {
             if (stockage.currentsRoom[roomReferences[1]].type == RoomType.Corridor)
             {
@@ -49,7 +50,7 @@ public class RoomData : MonoBehaviour
             topLeftWall.SetActive(true);
         }
 
-        if (roomReferences[3] != -1)
+        if (roomReferences[3] != -1 && stockage.currentsRoom[roomReferences[3]].proximityRoomIndex[7] != -1)
         {
             if (stockage.currentsRoom[roomReferences[3]].type == RoomType.Corridor)
             {
@@ -69,7 +70,7 @@ public class RoomData : MonoBehaviour
             topRightWall90.SetActive(true);
         }
 
-        if (roomReferences[5] != -1)
+        if (roomReferences[5] != -1 && stockage.currentsRoom[roomReferences[5]].proximityRoomIndex[1] != -1)
         {
             if (stockage.currentsRoom[roomReferences[5]].type == RoomType.Corridor)
             {
@@ -89,7 +90,7 @@ public class RoomData : MonoBehaviour
             buttomRightWall.SetActive(true);
         }
 
-        if (roomReferences[7] != -1)
+        if (roomReferences[7] != -1 && stockage.currentsRoom[roomReferences[7]].proximityRoomIndex[3] != -1)
         {
             if(stockage.currentsRoom[roomReferences[7]].type == RoomType.Corridor)
             {

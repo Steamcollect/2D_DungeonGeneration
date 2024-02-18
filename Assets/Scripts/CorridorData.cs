@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CorridorData : MonoBehaviour
 {
+    public int indexInList;
     [HideInInspector] public Stockage stockage;
     SpriteRenderer graphics;
 
@@ -28,43 +29,47 @@ public class CorridorData : MonoBehaviour
 
     public void SetRoomVisual(int[] roomReferences)
     {
-        if(roomReferences[1] != -1)
+        if(roomReferences[1] != -1 ||roomReferences[3] != -1 ||roomReferences[5] != -1 ||roomReferences[7] != -1)
         {
-            topLeftWall90.SetActive(true);
-            topRightWall90.SetActive(true);
-        }
-        else
-        {
-            topDoor.SetActive(true);
-        }
-        if(roomReferences[3] != -1)
-        {
-            topRightWall.SetActive(true);
-            buttomRightWall.SetActive(true);
-        }
-        else
-        {
-            rightDoor.SetActive(true);
-        }
-        if(roomReferences[5] != -1)
-        {
-            buttomRightWall90.SetActive(true);
-            buttomLeftWall90.SetActive(true);
-        }
-        else
-        {
-            buttomDoor.SetActive(true);
-        }
-        if(roomReferences[7] != -1)
-        {
-            buttomLeftWall.SetActive(true);
-            topLeftWall.SetActive(true);
-        }
-        else
-        {
-            leftDoor.SetActive(true);
+            if (roomReferences[1] != -1 && stockage.currentsRoom[roomReferences[1]].proximityRoomIndex[5] != -1)
+            {
+                topLeftWall90.SetActive(true);
+                topRightWall90.SetActive(true);
+            }
+            else
+            {
+                topDoor.SetActive(true);
+            }
+            if (roomReferences[3] != -1 && stockage.currentsRoom[roomReferences[3]].proximityRoomIndex[7] != -1)
+            {
+                topRightWall.SetActive(true);
+                buttomRightWall.SetActive(true);
+            }
+            else
+            {
+                rightDoor.SetActive(true);
+            }
+            if (roomReferences[5] != -1 && stockage.currentsRoom[roomReferences[5]].proximityRoomIndex[1] != -1)
+            {
+                buttomRightWall90.SetActive(true);
+                buttomLeftWall90.SetActive(true);
+            }
+            else
+            {
+                buttomDoor.SetActive(true);
+            }
+            if (roomReferences[7] != -1 && stockage.currentsRoom[roomReferences[7]].proximityRoomIndex[3] != -1)
+            {
+                buttomLeftWall.SetActive(true);
+                topLeftWall.SetActive(true);
+            }
+            else
+            {
+                leftDoor.SetActive(true);
+            }
         }
 
         graphics.enabled = false;
+
     }
 }
